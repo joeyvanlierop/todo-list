@@ -1,0 +1,73 @@
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
+header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    height: 20%;
+    padding: 0 3rem;
+    box-shadow: 0 4px 8px -1px rgba(0, 0, 0, .2);
+}
+
+header h1 {
+    margin: 0;
+}
+
+table {
+    border-collapse:separate; 
+    border-spacing: 0;
+    box-sizing: border-box;
+    padding: 3rem;
+    width: 100%;
+}
+
+table thead tr th:not(:first-child):not(:last-child) {
+    padding: 1rem 0;
+    border-bottom: .01rem lightgray solid;
+}
+
+table tbody tr td{
+    padding: 1rem 0;
+}
+
+table th {
+    text-align: left;
+}
+
+.centered {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.star, .dropdown {
+    width: 5%;
+    text-align: center;
+}
+
+.title {
+    width: auto;
+}
+
+.date {
+    padding-right: 2rem;
+}
+
+.date, .due {
+    width: 1%;
+    white-space: nowrap;
+}
+
+tbody .star, tbody .dropdown {
+    display: table-cell;
+}
+
+[data-visible="false"] {
+    display: none;
+}
+
+[data-visible="true"] {
+    display: table-row;
+}

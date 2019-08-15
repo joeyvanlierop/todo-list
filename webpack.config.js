@@ -1,7 +1,13 @@
 const path = require('path');
 
 module.exports = {
-  entry: './src/script.ts',
+  entry: {
+    main: './src/js/script.ts',
+  },
+  output: {
+    filename: 'bundle.js',
+    path: path.resolve(__dirname, 'dist/js')
+  },
   module: {
     rules: [
       {
@@ -14,8 +20,17 @@ module.exports = {
   resolve: {
     extensions: [ '.tsx', '.ts', '.js' ]
   },
-  output: {
-    filename: 'bundle.js',
-    path: path.resolve(__dirname, 'dist')
+  devServer:{
+    watchOptions: {
+      ignored: /node_modules/
+    },
+    contentBase: [
+      './dist',
+      './dist/css'
+      // path.resolve(__dirname, 'dist'),
+      // path.resolve(__dirname, 'dist/css')
+    ],
+    watchContentBase: true,
+    inline: true
   }
 };
