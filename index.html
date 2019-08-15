@@ -2,16 +2,48 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>Restaurant</title>
+        <title>Todo List</title>
         <meta name="author" content="">
         <meta name="description" content="">
-        <script async src="bundle.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/normalize.css">
+        <link rel="stylesheet" type="text/css" href="css/style.css">
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <script async src="js/bundle.js"></script>
     </head>
     <body>
-        <div>
-            <p>
-                Hello, World!
-            </p>
-        </div>
+        <header>
+            <h1>
+                Todo List
+            </h1>
+            
+        </header>
+        <table>
+            <thead>
+                <tr>
+                    <th class="star"></th>
+                    <th class="title">Title</th>
+                    <th class="date">Date Created</th>
+                    <th class="due">Date Due</th>
+                    <th class="dropdown"></th>
+                </tr>
+            </thead>
+            <tbody id="todo-container">
+                <template id="template-todo">
+                    <tr class="todo" data-open="false">
+                        <td class="star material-icons"></td>
+                        <td class="title"></td>
+                        <td class="date"></td>
+                        <td class="due"></td>
+                        <td class="dropdown material-icons">expand_more</td>
+                    </tr>
+                </template>
+                <template id="template-note">
+                    <tr class="note" data-visible="false">
+                        <td class="centered"><input type="checkbox"></td>
+                        <td class="text" colspan="4"></td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
     </body>
 </html>
