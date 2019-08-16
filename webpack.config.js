@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
   entry: {
-    main: './src/js/script.ts',
+    controller: './src/js/TodoController.ts'
   },
   output: {
     filename: 'bundle.js',
