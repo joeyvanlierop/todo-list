@@ -24,6 +24,20 @@ table {
     width: 100%;
 }
 
+table tbody tr {
+    transition-duration: .2s;
+    cursor: pointer;
+    color: rgba(0, 0, 0, .75);
+}
+
+table tbody tr:hover {
+    color: rgba(0, 0, 0, 1);
+}
+
+[data-open="true"] {
+    color: rgba(0, 0, 0, 1);
+}
+
 table thead tr th:not(:first-child):not(:last-child) {
     padding: 1rem 0;
     border-bottom: .01rem lightgray solid;
