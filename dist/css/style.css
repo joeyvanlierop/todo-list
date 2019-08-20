@@ -78,10 +78,34 @@ tbody .star, tbody .dropdown {
     display: table-cell;
 }
 
+.star, .dropdown {
+    user-select: none;
+}
+
+#create-todo {
+    filter: opacity(.5);
+}
+
+#create-todo .title {
+    padding: 0;
+}
+
+#create-todo .title input {
+    border: none;
+}
+
+#create-todo .title input:focus {
+    outline-width: 0;
+}
+
 [data-visible="false"] {
     display: none;
 }
 
 [data-visible="true"] {
     display: table-row;
+}
+
+[data-ready="true"] {
+    color: green;
 }

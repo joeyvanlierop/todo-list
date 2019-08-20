@@ -2,34 +2,71 @@ export class Model {
     private _todoList: Todo[];
     private _render: Function;
 
-    constructor(todoList: Todo[] = []) {
-        this._todoList = todoList;
+    constructor() {
+        this._todoList = [];
+        const todos = JSON.parse(localStorage.getItem("todoList")) || [];
+
+        todos.forEach((todoJson: any) => {
+            let todo = new Todo(todoJson._title,
+                                todoJson._starred,
+                                todoJson._dueDate,
+                                todoJson._dateCreated);
+
+            todoJson._notes.forEach((noteJson: any) => {
+                todo.addNote(noteJson._note, noteJson._checked);
+            });
+
+            this._todoList.push(todo);
+        });
+
     }
 
     public bindRender(callback: Function) {
         this._render = callback;
     }
 
-    public addTodo(todo: Todo) {
+    public addTodo(title: string, starred: boolean, dueDate: Date, dateCreated: Date) {
+        const todo = new Todo(title, starred, dueDate, dateCreated);
         this._todoList.push(todo);
-        this._render(this._todoList);
+
+        this.saveTodos(this._todoList);
     }
 
     public removeTodo(id: number) {
         this._todoList = this._todoList.filter(todo => todo.id != id);
-        this._render(this._todoList);
+
+        this.saveTodos(this._todoList);
     }
 
     public toggleStar(id: number) {
         this.getTodo(id).toggleStarred();
-        this._render(this._todoList);
+        this.saveTodos(this._todoList);
+    }
+
+    public toggleOpen(id: number) {
+        this.getTodo(id).toggleOpen();
+
+        this.saveTodos(this._todoList);
+    }
+
+    public toggleChecked(id: number, noteId: number) {
+        this.getTodo(id).notes.find(note => {
+            return note.id == noteId;
+        }).toggleChecked();
+
+        this.saveTodos(this._todoList);
     }
 
     private getTodo(id: number): Todo {
         return this._todoList.find(todo => todo.id == id);
     }
 
-    get todoList(): Todo[] {
+    private saveTodos(todos: Todo[]) {
+        this._render(todos);
+        localStorage.setItem("todoList", JSON.stringify(todos));
+    }
+
+    public get todoList(): Todo[] {
         return this._todoList;
     }
 }
@@ -41,15 +78,16 @@ export class Todo {
     private _dateCreated: Date;
     private _dueDate: Date;
     private _open: boolean;
-    private _id: number;
-    private static idIndex: number;
+    private _noteIdIndex: number;
+    private readonly _id: number;
+    public static idIndex: number;
 
-	constructor(title: string, notes: TodoNote[], starred: boolean, dueDate: Date) {
+	constructor(title: string, starred: boolean, dueDate: Date, dateCreated: Date = new Date(), notes: TodoNote[] = []) {
 		this._title = title;
-		this._notes = notes;
         this._starred = starred;
-        this._dueDate = dueDate;
-        this._dateCreated = new Date();
+        this._dueDate = new Date(dueDate);
+        this._dateCreated = new Date(dateCreated);
+		this._notes = notes;
         this._open = false;
         this._id = ++Todo.idIndex || (Todo.idIndex = 0);
     }
@@ -139,6 +177,17 @@ export class Todo {
      */
 	public set notes(value: TodoNote[]) {
 		this._notes = value;
+    }
+    
+    /**
+     * Add single note
+     * @param {TodoNote[]} value
+     */
+	public addNote(text: string, checked: boolean = false) {
+        const id = ++this._noteIdIndex || (this._noteIdIndex = 0);
+        let note = new TodoNote(text, id, checked);
+
+		this._notes.push(note);
 	}
 
     /**
@@ -174,13 +223,15 @@ export class Todo {
 	}
 }
 
-export class TodoNote {
+class TodoNote {
     private _note: string;
     private _checked: boolean;
+    private readonly _id: number;
 
-    constructor(note: string) {
+    constructor(note: string, id: number, checked: boolean) {
         this._note = note;
-        this._checked = false;
+        this._id = id;
+        this._checked = checked;
     }
 
     /**
@@ -197,6 +248,14 @@ export class TodoNote {
      */
 	public get checked(): boolean {
 		return this._checked;
+    }
+    
+    /**
+     * Getter id
+     * @return {boolean}
+     */
+	public get id(): number {
+		return this._id;
 	}
 
     /**
@@ -213,5 +272,12 @@ export class TodoNote {
      */
 	public set checked(value: boolean) {
 		this._checked = value;
-	}
+    }
+    
+    /**
+     * Toggle checked
+     */
+	public toggleChecked() {
+		this._checked = !this._checked;
+    }
 }

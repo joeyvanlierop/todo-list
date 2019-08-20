@@ -7,16 +7,15 @@
         <meta name="description" content="">
         <link rel="stylesheet" type="text/css" href="css/normalize.css">
         <link rel="stylesheet" type="text/css" href="css/style.css">
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
         <script async src="js/bundle.js"></script>
     </head>
     <body>
         <header>
             <h1>Todo List</h1>
-            <input type="text" placeholder="Create Todo">
         </header>
-        <table>
-            <thead>
+        <table id="todo-container">
+            <thead class="permanent">
                 <tr>
                     <th class="star"></th>
                     <th class="title">Title</th>
@@ -25,22 +24,14 @@
                     <th class="dropdown"></th>
                 </tr>
             </thead>
-            <tbody id="todo-container">
-                <template id="template-todo">
-                    <tr class="todo" data-open="false">
-                        <td class="star material-icons"></td>
-                        <td class="title"></td>
-                        <td class="date"></td>
-                        <td class="due"></td>
-                        <td class="dropdown material-icons">expand_more</td>
-                    </tr>
-                </template>
-                <template id="template-note">
-                    <tr class="note" data-visible="false">
-                        <td class="centered"><input type="checkbox"></td>
-                        <td class="text" colspan="4"></td>
-                    </tr>
-                </template>
+            <tbody class="permanent" id="create-todo">
+                <tr>
+                    <td class="star add-star material-icons">star_border</td>
+                    <td class="title"><input type="text" placeholder="Create To-Do" id="add-title"></td>
+                    <td class="date" id="add-date"></td>
+                    <td class="due"><input type="date" id="add-due"></td>
+                    <td class="dropdown material-icons" id="add" data-ready="false">check</td>
+                </tr>
             </tbody>
         </table>
     </body>
