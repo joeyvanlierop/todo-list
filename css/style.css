@@ -82,30 +82,29 @@ tbody .star, tbody .dropdown {
     user-select: none;
 }
 
-#create-todo {
+#create-todo, .create-note {
     filter: opacity(.5);
 }
 
-#create-todo .title {
+#create-todo .title, .create-note input[type=text] {
     padding: 0;
 }
 
-#create-todo .title input {
-    border: none;
-}
-
-#create-todo .title input:focus {
+#create-todo .title input:focus, .create-note input:focus{
     outline-width: 0;
 }
 
-[data-visible="false"] {
-    display: none;
+input[type=text] {
+    width: 100%;
+    border: none;
 }
 
-[data-visible="true"] {
-    display: table-row;
+[data-ready="false"] {
+    transition: color .4s;
+    color: inherit;
 }
 
 [data-ready="true"] {
+    transition: color .4s;
     color: green;
 }
