@@ -4,6 +4,7 @@ import { format, parse, isAfter, isSameDay } from "date-fns";
 export class View {
     private _todoRoot: HTMLTableSectionElement;
     private _createTodo: HTMLTableSectionElement;
+    private _addStar: HTMLElement;
     private _addTitle: HTMLInputElement;
     private _addDate: HTMLElement;
     private _addDue: HTMLInputElement;
@@ -12,18 +13,27 @@ export class View {
     constructor() {
         this._todoRoot = document.getElementById("todo-container") as HTMLTableSectionElement;
         this._createTodo = document.getElementById("create-todo") as HTMLTableSectionElement;
+        this._addStar = document.getElementById("add-star") as HTMLElement;
         this._addTitle = document.getElementById("add-title") as HTMLInputElement;
         this._addDate = document.getElementById("add-date") as HTMLElement;
         this._addDue = document.getElementById("add-due") as HTMLInputElement;
         this._add = document.getElementById("add") as HTMLElement;
     }
 
-    public clearInput() {
+    private clearAddTodo() {
+        this._addStar.textContent = "star_border"
         this._addTitle.value = "";
         this._addDue.value = "";
         this._addDate.textContent = format(new Date(), "MMMM d, y");
 
-        this.validate()
+        this.validateAddTodo()
+    }
+
+    private clearAddNote(addNoteRow: HTMLElement) {
+        addNoteRow.querySelector("input").checked = false;
+        (addNoteRow.querySelector(".note-text") as HTMLInputElement).value = "";
+
+        this.validateAddNote(addNoteRow);
     }
 
     private createElement(elementType: string, classList: string[] = []): HTMLElement {
@@ -40,17 +50,35 @@ export class View {
         this._addDate.textContent = format(new Date(), "MMMM d, y");
 
         // Initialize Event Listener For The New Todo Creation Table Row
+        this._addStar.addEventListener("click", (event) => {
+            if(this._addStar.textContent == "star") {
+                this._addStar.textContent = "star_border";
+            } else {
+                this._addStar.textContent = "star";
+            }
+
+            event.stopImmediatePropagation();
+        })
+
+        // Initialize Event Listener For The New Todo Creation Table Row
         this._createTodo.addEventListener("change", (event) => {
-            this.validate();
+            this.validateAddTodo();
         });
     }
 
-    private validate(): boolean {
+    private validateAddTodo(): boolean {
         const ready =  this._addTitle.value != "" &&
                       (isAfter(this._addDue.valueAsDate, parse(this._addDate.textContent, "MMMM d, y", new Date())) ||
                        isSameDay(this._addDue.valueAsDate, parse(this._addDate.textContent, "MMMM d, y", new Date())));
 
         this._add.dataset["ready"] = ready.toString();
+        return ready;
+    }
+
+    private validateAddNote(addNoteRow: HTMLElement): boolean {
+        const ready = (addNoteRow.querySelector(".note-text") as HTMLInputElement).value != "";
+
+        (addNoteRow.querySelector(".submit-note") as HTMLElement).dataset["ready"] = ready.toString();
         return ready;
     }
 
@@ -95,30 +123,59 @@ export class View {
             dropdown.textContent = todo.open ? "expand_more" : "expand_less";
             todoElement.appendChild(dropdown);
 
-            container.appendChild(todoElement);
+            // Creation Of The "TodoNote" Components If The Todo Note Is Open
+            if(todo.open) {
+                // Creation Of The TodoItem's "TodoNote" Creator
+                let addNote = this.createElement("tr", ["create-note"]);
+                addNote.addEventListener("change", () => {
+                    this.validateAddNote(addNote);
+                })
+                container.appendChild(addNote);      
 
-            // Creation Of The TodoItem's "TodoNote" Elements
-            todo.notes.forEach(note => {
-                let noteElement = this.createElement("tr");
-                noteElement.dataset["noteId"] = note.id.toString();
-                noteElement.dataset["visible"] = todo.open.toString();
+                let addNoteCheckboxCell = this.createElement("td", ["centered"]);
+                addNote.appendChild(addNoteCheckboxCell);
 
-                let noteCheckboxCell = this.createElement("td", ["centered"]);
-                noteElement.appendChild(noteCheckboxCell);
+                let addNoteCheckbox = this.createElement("input", ["check", "placeholder"]) as HTMLInputElement;
+                addNoteCheckbox.type = "checkbox";
+                addNoteCheckbox.checked = false;
+                addNoteCheckboxCell.appendChild(addNoteCheckbox);
 
-                let noteCheckbox = this.createElement("input", ["check"]) as HTMLInputElement;
-                noteCheckbox.type = "checkbox";
-                noteCheckbox.checked = note.checked;
-                noteCheckboxCell.appendChild(noteCheckbox);
+                let addNoteText = this.createElement("td") as HTMLTableDataCellElement;
+                addNoteText.colSpan = 3;
+                addNote.appendChild(addNoteText);
 
-                let noteText = this.createElement("td") as HTMLTableDataCellElement;
-                noteText.textContent = note.note;
-                noteText.colSpan = 4;
-                noteElement.appendChild(noteText);
+                let addNoteTextInput = this.createElement("input", ["note-text"]) as HTMLInputElement;
+                addNoteTextInput.type = "text";
+                addNoteTextInput.placeholder = "Create Note"
+                addNoteText.appendChild(addNoteTextInput);
 
-                container.appendChild(noteElement);                
-            });
+                let addNoteSubmit = this.createElement("td", ["dropdown", "material-icons", "submit-note"])
+                addNoteSubmit.innerText = "check";
+                addNoteSubmit.dataset["ready"] = "false";
+                addNote.appendChild(addNoteSubmit);
 
+                // Creation Of The TodoItem's "TodoNote" Elements
+                todo.notes.forEach(note => {
+                    let noteElement = this.createElement("tr");
+                    noteElement.dataset["noteId"] = note.id.toString();
+    
+                    let noteCheckboxCell = this.createElement("td", ["centered"]);
+                    noteElement.appendChild(noteCheckboxCell);
+    
+                    let noteCheckbox = this.createElement("input", ["check"]) as HTMLInputElement;
+                    noteCheckbox.type = "checkbox";
+                    noteCheckbox.checked = note.checked;
+                    noteCheckboxCell.appendChild(noteCheckbox);
+    
+                    let noteText = this.createElement("td") as HTMLTableDataCellElement;
+                    noteText.textContent = note.note;
+                    noteText.colSpan = 4;
+                    noteElement.appendChild(noteText);
+    
+                    container.appendChild(noteElement);                
+                });
+            }
+            
             this._todoRoot.appendChild(container);
         });
     }
@@ -127,14 +184,33 @@ export class View {
         this._todoRoot.addEventListener("click", (event) => {
             const target = event.target as HTMLElement
 
-            if(target.id = "add") {
-                if(this.validate()) {             
+            if(target.id == "add") {
+                if(this.validateAddTodo()) {   
                     handler(this._addTitle.value,
-                            false,
+                            this._addStar.textContent == "star",
                             this._addDue.valueAsDate,
                             parse(this._addDate.textContent, "MMMM d, y", new Date()));
-                    this.clearInput();
+                    this.clearAddTodo();
+                    event.stopImmediatePropagation();
+                }
+            }
+        });
+    }
 
+    public bindAddNote(handler: Function) {
+        this._todoRoot.addEventListener("click", (event) => {
+            const target = event.target as HTMLElement
+
+            if(target.classList.contains("submit-note")) {
+                const addNoteRow = target.parentElement as HTMLElement;
+                const id = (addNoteRow.parentElement.firstChild as HTMLElement).dataset.id;
+
+                if(this.validateAddNote(target.parentElement)) {   
+                    handler(id,
+                           (addNoteRow.querySelector(".note-text") as HTMLInputElement).value,
+                           (addNoteRow.querySelector("input") as HTMLInputElement).checked);
+                    
+                    this.clearAddNote(addNoteRow);
                     event.stopImmediatePropagation();
                 }
             }
@@ -147,8 +223,8 @@ export class View {
 
             if(target.classList.contains("star")) {
                 const id: number = parseInt(target.parentElement.dataset["id"], 10);
+                
                 handler(id);
-
                 event.stopImmediatePropagation();
             }
         });
@@ -160,6 +236,7 @@ export class View {
 
             if(target.parentElement.classList.contains("todo")) {
                 const id: number = parseInt(target.parentElement.dataset["id"], 10);
+                
                 handler(id);
             }
         });
@@ -169,9 +246,10 @@ export class View {
         this._todoRoot.addEventListener("click", (event) => {
             const target = event.target as HTMLElement
 
-            if(target.classList.contains("check")) {
+            if(target.classList.contains("check") && !target.classList.contains("placeholder")) {
                 const id: number = parseInt((target.parentElement.parentElement.parentElement.firstChild as HTMLElement).dataset["id"], 10);
                 const noteId: number = parseInt(target.parentElement.parentElement.dataset["noteId"], 10);
+                
                 handler(id, noteId);
             }
         });
@@ -183,9 +261,9 @@ export class View {
 
             if(target.classList.contains("delete")) {
                 const id: number = parseInt(target.parentElement.dataset["id"], 10);
+                
                 handler(id);
             }
         });
     }
 }
-

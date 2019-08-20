@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-  devtool: 'source-map',
+  mode: 'development',
   entry: {
     controller: './src/js/TodoController.ts'
   },

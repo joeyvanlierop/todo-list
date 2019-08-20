@@ -18,7 +18,6 @@ export class Model {
 
             this._todoList.push(todo);
         });
-
     }
 
     public bindRender(callback: Function) {
@@ -29,17 +28,27 @@ export class Model {
         const todo = new Todo(title, starred, dueDate, dateCreated);
         this._todoList.push(todo);
 
+        this.organizeList(this._todoList);
+        this.saveTodos(this._todoList);
+    }
+
+    public addNote(id: number, text: string, checked: boolean) {
+        this.getTodo(id).addNote(text, checked);
+
         this.saveTodos(this._todoList);
     }
 
     public removeTodo(id: number) {
         this._todoList = this._todoList.filter(todo => todo.id != id);
 
+        this.organizeList(this._todoList);
         this.saveTodos(this._todoList);
     }
 
     public toggleStar(id: number) {
         this.getTodo(id).toggleStarred();
+
+        this.organizeList(this._todoList);
         this.saveTodos(this._todoList);
     }
 
@@ -64,6 +73,24 @@ export class Model {
     private saveTodos(todos: Todo[]) {
         this._render(todos);
         localStorage.setItem("todoList", JSON.stringify(todos));
+    }
+
+    private organizeList(todos: Todo[]): Todo[] {
+        return todos.sort(function(a, b) {
+            if(a.starred && !b.starred) {
+                return -1;
+            } else if(!a.starred && b.starred) {
+                return 1;
+            } else {
+                if(a.dueDate < b.dueDate) {
+                    return -1;
+                } else if(a.dueDate > b.dueDate) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        });
     }
 
     public get todoList(): Todo[] {
